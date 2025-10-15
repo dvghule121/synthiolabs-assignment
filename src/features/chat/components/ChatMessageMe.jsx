@@ -26,7 +26,7 @@ const getFileIcon = (fileType) => {
 export default function ChatMessageMe({ text, time, attachments = [] }) {
   return (
     <div className="flex justify-end">
-      <div className="max-w-[50%] bg-blue-600 text-white px-4 py-3 rounded-tl-3xl rounded-tr-none rounded-bl-3xl rounded-br-3xl">
+      <div className="max-w-[70%] w-fit bg-blue-600 text-white px-4 py-3 rounded-tl-3xl rounded-tr-none rounded-bl-3xl rounded-br-3xl">
         {/* Attachments */}
         {attachments && attachments.length > 0 && (
           <div className="mb-3 space-y-2">

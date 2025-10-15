@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ChatMessageMe from "./ChatMessageMe";
 import ChatMessageUser from "./ChatMessageUser";
 import ChatInput from "./ChatInput";
 import TypingIndicator from "./TypingIndicator";
+import VideoCall from "./VideoCall";
 import { useChat } from "../context/ChatContext";
 
 export default function ChatWindow({ chat }) {
-  const { isLoading } = useChat();
+  const { isLoading, isVideoCallActive, toggleVideoCall } = useChat();
+  const [isAudioOnly, setIsAudioOnly] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -35,53 +37,79 @@ export default function ChatWindow({ chat }) {
         </div>
 
         <div className="flex gap-4 items-center">
-          <div className="border-1 border-gray-100 p-1 w-10 h-10 rounded-full flex items-center justify-center shadow-sm">
+          <button
+            onClick={() => {
+              setIsAudioOnly(false);
+              toggleVideoCall();
+            }}
+            className="border-1 border-gray-100 p-1 w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+            title="Start video call"
+          >
             <img
               src="/VideoCamera.svg"
               alt="video-call-btn-icon"
               className=""
             />
-          </div>
+          </button>
 
-          <div className="border-1 border-gray-100 p-1 w-10 h-10 rounded-full flex items-center justify-center shadow-sm">
-            <img src="/Phone.svg" alt="video-call-btn-icon" className="" />
-          </div>
+          <button
+            onClick={() => {
+              setIsAudioOnly(true);
+              toggleVideoCall();
+            }}
+            className="border-1 border-gray-100 p-1 w-10 h-10 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors"
+            title="Start audio call"
+          >
+            <img src="/Phone.svg" alt="audio-call-btn-icon" className="" />
+          </button>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto space-y-6 px-8 py-6 pb-16 bg-white w-full">
-        {chat.messages.map((msg) =>
-          msg.sender === "Me" ? (
-            <ChatMessageMe
-              key={msg.id}
-              text={msg.text}
-              time={msg.timestamp}
-              attachments={msg.attachments}
-            />
-          ) : (
-            <ChatMessageUser
-              key={msg.id}
-              text={msg.text}
-              time={msg.timestamp}
-              messageId={msg.id}
-              feedback={msg.feedback}
-            />
-          )
-        )}
+      {/* Video Call UI - Replaces messages and input when active */}
+      {isVideoCallActive ? (
+        <VideoCall
+          key={`video-call-${chat.id}`}
+          onClose={toggleVideoCall}
+          chat={chat}
+          isAudioOnly={isAudioOnly}
+        />
+      ) : (
+        <>
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto space-y-6 px-8 py-6 pb-16 bg-white w-full">
+            {chat.messages.map((msg) =>
+              msg.sender === "Me" ? (
+                <ChatMessageMe
+                  key={msg.id}
+                  text={msg.text}
+                  time={msg.timestamp}
+                  attachments={msg.attachments}
+                />
+              ) : (
+                <ChatMessageUser
+                  key={msg.id}
+                  text={msg.text}
+                  time={msg.timestamp}
+                  messageId={msg.id}
+                  feedback={msg.feedback}
+                />
+              )
+            )}
 
-        {/* Typing indicator */}
-        {isLoading && <TypingIndicator />}
+            {/* Typing indicator */}
+            {isLoading && <TypingIndicator />}
 
-        {/* Scroll anchor */}
-        <div ref={messagesEndRef} />
-      </div>
+            {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
+          </div>
 
-      {/* Input Area with Gradient Fade */}
-      <div className="relative">
-        <div className="absolute inset-x-0 -top-16 w-full h-16 bg-gradient-to-t from-white via-white/30 to-transparent pointer-events-none" />
-        <ChatInput />
-      </div>
+          {/* Input Area with Gradient Fade */}
+          <div className="relative">
+            <div className="absolute inset-x-0 -top-16 w-full h-16 bg-gradient-to-t from-white via-white/30 to-transparent pointer-events-none" />
+            <ChatInput />
+          </div>
+        </>
+      )}
     </section>
   );
 }
