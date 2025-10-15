@@ -10,6 +10,7 @@ const initialState = {
   chats: [],
   selectedChatId: null,
   isLoading: false,
+  isVideoCallActive: false,
 };
 
 // Action types
@@ -21,6 +22,7 @@ const ACTIONS = {
   UPDATE_LAST_MESSAGE: "UPDATE_LAST_MESSAGE",
   UPDATE_MESSAGE_FEEDBACK: "UPDATE_MESSAGE_FEEDBACK",
   REGENERATE_MESSAGE: "REGENERATE_MESSAGE",
+  TOGGLE_VIDEO_CALL: "TOGGLE_VIDEO_CALL",
 };
 
 // Reducer
@@ -104,6 +106,12 @@ function chatReducer(state, action) {
         ),
       };
 
+    case ACTIONS.TOGGLE_VIDEO_CALL:
+      return {
+        ...state,
+        isVideoCallActive: !state.isVideoCallActive,
+      };
+
     default:
       return state;
   }
@@ -152,6 +160,10 @@ export function ChatProvider({ children }) {
       type: ACTIONS.REGENERATE_MESSAGE,
       payload: { chatId, messageId },
     });
+  }, []);
+
+  const toggleVideoCall = useCallback(() => {
+    dispatch({ type: ACTIONS.TOGGLE_VIDEO_CALL });
   }, []);
 
   // Helper functions
@@ -253,6 +265,7 @@ export function ChatProvider({ children }) {
     updateLastMessage,
     updateMessageFeedback,
     regenerateMessage,
+    toggleVideoCall,
     getSelectedChat,
     sendMessage,
   };

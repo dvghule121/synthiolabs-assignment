@@ -46,7 +46,7 @@ export default function ChatMessageUser({ text, time, messageId, feedback }) {
 
   return (
     <div className="flex flex-col justify-start">
-      <div className="bg-gray-100 text-gray-900 px-4 py-3 rounded-tl-none rounded-tr-3xl rounded-bl-3xl rounded-br-3xl relative">
+      <div className="max-w-[70%] w-fit bg-gray-100 text-gray-900 px-4 py-3 rounded-tl-none rounded-tr-3xl rounded-bl-3xl rounded-br-3xl relative">
         <p className="text-sm leading-relaxed whitespace-pre-line">{text}</p>
         <div className="text-[11px] text-gray-400 text-right mt-1">
           {new Date(time).toLocaleTimeString([], {
