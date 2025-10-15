@@ -23,6 +23,7 @@ const ACTIONS = {
   UPDATE_MESSAGE_FEEDBACK: "UPDATE_MESSAGE_FEEDBACK",
   REGENERATE_MESSAGE: "REGENERATE_MESSAGE",
   TOGGLE_VIDEO_CALL: "TOGGLE_VIDEO_CALL",
+  CREATE_GROUP_CHAT: "CREATE_GROUP_CHAT",
 };
 
 // Reducer
@@ -112,6 +113,14 @@ function chatReducer(state, action) {
         isVideoCallActive: !state.isVideoCallActive,
       };
 
+    case ACTIONS.CREATE_GROUP_CHAT:
+      const { newGroupChat } = action.payload;
+      return {
+        ...state,
+        chats: [newGroupChat, ...state.chats],
+        selectedChatId: newGroupChat.id,
+      };
+
     default:
       return state;
   }
@@ -166,6 +175,64 @@ export function ChatProvider({ children }) {
     dispatch({ type: ACTIONS.TOGGLE_VIDEO_CALL });
   }, []);
 
+  const createGroupChat = useCallback(
+    (
+      participants,
+      groupName,
+      initialMessage = null,
+      initialAttachments = []
+    ) => {
+      const messages = [];
+      let lastMessage = "Group created";
+
+      // If there's an initial message, add it to the messages array
+      if (initialMessage || initialAttachments.length > 0) {
+        const messageId = Math.random().toString(36).slice(2, 9);
+        const timestamp = new Date().toISOString();
+
+        messages.push({
+          id: messageId,
+          sender: "Me",
+          senderId: "me",
+          senderAvatar: "/doc.png",
+          text: initialMessage || "",
+          attachments: initialAttachments.map((file) => ({
+            id: Math.random().toString(36).slice(2, 9),
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            preview: file.type.startsWith("image/")
+              ? URL.createObjectURL(file)
+              : null,
+          })),
+          timestamp,
+        });
+
+        lastMessage = initialMessage || "File attachment";
+      }
+
+      const newGroupChat = {
+        id: Math.random().toString(36).slice(2, 9),
+        name: groupName || participants.map((p) => p.name).join(", "),
+        role: "Group Chat",
+        avatar: null,
+        isGroup: true,
+        participants: participants,
+        lastMessage: lastMessage,
+        lastActive: "now",
+        messages: messages,
+      };
+
+      dispatch({
+        type: ACTIONS.CREATE_GROUP_CHAT,
+        payload: { newGroupChat },
+      });
+
+      return newGroupChat.id;
+    },
+    []
+  );
+
   // Helper functions
   const getSelectedChat = useCallback(() => {
     return state.chats.find((chat) => chat.id === state.selectedChatId);
@@ -173,7 +240,9 @@ export function ChatProvider({ children }) {
 
   const sendMessage = useCallback(
     async (text, attachments = []) => {
-      if (!state.selectedChatId) return;
+      if (!state.selectedChatId) {
+        return;
+      }
 
       const messageId = Math.random().toString(36).slice(2, 9);
       const timestamp = new Date().toISOString();
@@ -182,6 +251,8 @@ export function ChatProvider({ children }) {
       const userMessage = {
         id: messageId,
         sender: "Me",
+        senderId: "me",
+        senderAvatar: "/doc.png",
         text: text || "",
         attachments: attachments.map((file) => ({
           id: Math.random().toString(36).slice(2, 9),
@@ -205,10 +276,33 @@ export function ChatProvider({ children }) {
           const randomResponse = generateRandomResponse(text, attachments);
           const responseId = Math.random().toString(36).slice(2, 9);
           const responseTimestamp = new Date().toISOString();
+          const selectedChat = getSelectedChat();
+
+          // For group chats, select a random participant to respond
+          let responder;
+          if (selectedChat?.isGroup && selectedChat.participants.length > 0) {
+            const randomParticipant =
+              selectedChat.participants[
+                Math.floor(Math.random() * selectedChat.participants.length)
+              ];
+            responder = {
+              name: randomParticipant.name,
+              id: randomParticipant.id,
+              avatar: randomParticipant.avatar,
+            };
+          } else {
+            responder = {
+              name: selectedChat?.name || "Assistant",
+              id: selectedChat?.participants?.[0]?.id || "assistant",
+              avatar: selectedChat?.participants?.[0]?.avatar || "/doc.png",
+            };
+          }
 
           const botMessage = {
             id: responseId,
-            sender: getSelectedChat()?.name || "Assistant",
+            sender: responder.name,
+            senderId: responder.id,
+            senderAvatar: responder.avatar,
             text: randomResponse,
             timestamp: responseTimestamp,
           };
@@ -266,6 +360,7 @@ export function ChatProvider({ children }) {
     updateMessageFeedback,
     regenerateMessage,
     toggleVideoCall,
+    createGroupChat,
     getSelectedChat,
     sendMessage,
   };

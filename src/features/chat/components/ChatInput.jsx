@@ -8,7 +8,7 @@ import { useChat } from "../context/ChatContext";
 // - Paperclip and Send icons are inside the same bubble row (relative flow).
 // - Clicking anywhere on the bubble focuses the textarea.
 
-export default function ChatInput() {
+export default function ChatInput({ onSendMessage }) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
   const fileRef = useRef(null);
@@ -50,11 +50,19 @@ export default function ChatInput() {
   function sendMessageImpl() {
     if (!message.trim() && attachments.length === 0) return;
 
-    // Send message through context
-    sendMessage(
-      message.trim(),
-      attachments.map((a) => a.file)
-    );
+    // If onSendMessage prop is provided, use it (for NewMessageView)
+    if (onSendMessage) {
+      onSendMessage(
+        message.trim(),
+        attachments.map((a) => a.file)
+      );
+    } else {
+      // Send message through context (for regular chat)
+      sendMessage(
+        message.trim(),
+        attachments.map((a) => a.file)
+      );
+    }
 
     // Clean up preview URLs
     attachments.forEach((a) => a.preview && URL.revokeObjectURL(a.preview));
@@ -157,16 +165,7 @@ export default function ChatInput() {
                 className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shadow-sm hover:bg-gray-100"
                 aria-label="attach file"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <path d="M21.44 11.05l-8.49 8.49a5 5 0 01-7.07-7.07l8.49-8.49a3 3 0 014.24 4.24l-8.49 8.49a1 1 0 01-1.42-1.42l8.49-8.49" />
-                </svg>
+                <img src="/Paperclip.svg" alt="attach-file" />
                 <input
                   ref={fileRef}
                   type="file"

@@ -3,3 +3,30 @@
 body {
   background-color: #F9FAFF;
 }
+
+/* Global button cursor styling */
+button,
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.btn,
+.button {
+  cursor: pointer;
+}
+
+/* Ensure clickable elements have pointer cursor */
+.clickable,
+[onclick],
+[onClick] {
+  cursor: pointer;
+}
+
+/* Disabled buttons should not have pointer cursor */
+button:disabled,
+[role="button"]:disabled,
+input:disabled,
+.btn:disabled,
+.button:disabled {
+  cursor: not-allowed;
+}

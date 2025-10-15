@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { useChat } from "../context/ChatContext";
 
-export default function ChatMessageUser({ text, time, messageId, feedback }) {
+export default function ChatMessageUser({
+  text,
+  time,
+  messageId,
+  feedback,
+  senderName,
+  senderAvatar,
+  isGroup,
+}) {
   const { selectedChatId, updateMessageFeedback, regenerateMessage } =
     useChat();
   const [isCopied, setIsCopied] = useState(false);
@@ -46,7 +54,21 @@ export default function ChatMessageUser({ text, time, messageId, feedback }) {
 
   return (
     <div className="flex flex-col justify-start">
-      <div className="max-w-[70%] w-fit bg-gray-100 text-gray-900 px-4 py-3 rounded-tl-none rounded-tr-3xl rounded-bl-3xl rounded-br-3xl relative">
+      {/* Sender info for group chats */}
+      {isGroup && senderName && (
+        <div className="flex items-center gap-2 mb-1 ml-1">
+          <img
+            src={senderAvatar || "/doc.png"}
+            alt={senderName}
+            className="w-6 h-6 rounded-full object-cover"
+          />
+          <span className="text-xs font-medium text-gray-600">
+            {senderName}
+          </span>
+        </div>
+      )}
+
+      <div className="w-fit bg-gray-100 text-gray-900 px-4 py-3 rounded-tl-none rounded-tr-3xl rounded-bl-3xl rounded-br-3xl relative">
         <p className="text-sm leading-relaxed whitespace-pre-line">{text}</p>
         <div className="text-[11px] text-gray-400 text-right mt-1">
           {new Date(time).toLocaleTimeString([], {

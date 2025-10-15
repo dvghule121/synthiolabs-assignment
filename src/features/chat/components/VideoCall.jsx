@@ -1,17 +1,21 @@
 import React, { useState } from "react";
 import CallControls from "./CallControls";
+import ParticipantCard from "./ParticipantCard";
 import GlassmorphismContainer from "../../../components/GlassmorphismContainer";
+import TranscriptionModal from "./TranscriptionModal";
 
 export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
   const [isVideoEnabled, setIsVideoEnabled] = useState(!isAudioOnly);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isGroupCall, setIsGroupCall] = useState(chat?.isGroup || false);
+  const [isTranscriptionOpen, setIsTranscriptionOpen] = useState(false);
 
   const handleHangup = () => {
     onClose();
   };
 
   const handleChatToggle = () => {
-    console.log("Toggle chat visibility");
+    setIsTranscriptionOpen(!isTranscriptionOpen);
   };
 
   const toggleVideo = () => {
@@ -22,9 +26,117 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
     setIsAudioEnabled(!isAudioEnabled);
   };
 
+  // Dummy transcription data based on chat messages
+  const getTranscriptionData = () => {
+    if (!chat?.messages) return [];
+
+    // Use existing chat messages as transcription data
+    return chat.messages.map((message, index) => ({
+      ...message,
+      id: `transcript-${message.id}`,
+      // Add some transcription-specific properties
+      isTranscription: true,
+    }));
+  };
+
+  // Group audio call layout
+  const renderGroupAudioCall = () => {
+    const participants = chat?.participants || [];
+
+    return (
+      <div className="flex-1 flex flex-col bg-white p-8">
+        {/* Group Call Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-gray-900 text-2xl font-semibold mb-2">
+            {chat?.name || "Group Call"}
+          </h2>
+          <p className="text-gray-500 text-lg">
+            {participants.length} participant
+            {participants.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+
+        {/* Participants Grid */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="grid grid-cols-2 gap-8 max-w-2xl w-full">
+            {participants.map((participant, index) => (
+              <ParticipantCard
+                key={participant.id}
+                participant={participant}
+                isVideoCall={false}
+                isSpeaking={index === 0}
+              />
+            ))}
+
+            {/* "You" placeholder */}
+            <ParticipantCard
+              participant={{
+                id: "you",
+                name: "You",
+                role: "Connected",
+                avatar: "/doc.png",
+              }}
+              isYou={true}
+              isVideoCall={false}
+              isSpeaking={true}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Group video call layout
+  const renderGroupVideoCall = () => {
+    const participants = chat?.participants || [];
+    const gridCols = participants.length <= 4 ? 2 : 3;
+    const gridRows = Math.ceil(participants.length / gridCols);
+
+    return (
+      <div className="flex-1 flex flex-col bg-white p-4">
+        {/* Video Grid */}
+        <div
+          className="flex-1 grid gap-4 max-w-[800px] mx-auto"
+          style={{
+            gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+            gridTemplateRows: `repeat(${gridRows}, 1fr)`,
+          }}
+        >
+          {participants.map((participant, index) => (
+            <ParticipantCard
+              key={participant.id}
+              participant={participant}
+              isVideoCall={true}
+              isSpeaking={index === 0}
+            />
+          ))}
+
+          {/* "You" placeholder */}
+          <ParticipantCard
+            participant={{
+              id: "you",
+              name: "You",
+              role: "Connected",
+              avatar: "/doc.png",
+            }}
+            isYou={true}
+            isVideoCall={true}
+            isSpeaking={false}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="flex-1 flex flex-col bg-white">
-      {isAudioOnly ? (
+    <div className="flex-1 flex flex-col bg-white relative overflow-hidden">
+      {isGroupCall ? (
+        isAudioOnly ? (
+          renderGroupAudioCall()
+        ) : (
+          renderGroupVideoCall()
+        )
+      ) : isAudioOnly ? (
         /* Audio Call UI - Consistent with theme */
         <div className="flex-1 flex flex-col items-center justify-center p-8">
           {/* Profile Section */}
@@ -73,7 +185,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
         <div className="relative w-full mx-4 mt-4 max-h-[400px] mx-auto">
           <div
             className="relative h-full mx-auto"
-            style={{ aspectRatio: "5/3" }}
+            style={{ aspectRatio: "16/9" }}
           >
             <div className="absolute inset-0 border-4 border-green-500 rounded-3xl overflow-hidden bg-gray-800">
               {/* Remote Video Placeholder */}
@@ -95,7 +207,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
               </div>
 
               {/* Audio Indicator */}
-              <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full">
+              <div className="absolute top-4 right-4 bg-white  text-white p-2 rounded-full">
                 <img src="/SpeakerHigh.svg" alt="Audio" className="w-5 h-5" />
               </div>
             </div>
@@ -103,67 +215,87 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
         </div>
       )}
 
-      {/* Bottom Controls - Using reusable CallControls component */}
-      {isAudioOnly ? (
-        /* Audio Call Controls */
-        <div className="flex justify-center items-center p-6">
+      {/* Bottom Controls - Absolutely positioned */}
+      <div className="absolute bottom-2 left-0 right-0 flex justify-center items-center z-10">
+        {isGroupCall ? (
           <CallControls
             isAudioEnabled={isAudioEnabled}
             onToggleAudio={toggleAudio}
             onToggleChat={handleChatToggle}
             onHangup={handleHangup}
-            showVideoToggle={false}
-          />
-        </div>
-      ) : (
-        /* Video Call Controls - Using reusable CallControls component */
-        <div className="flex items-center justify-between p-6">
-          {/* Left side - Empty for spacing */}
-          <div className="w-32"></div>
-
-          {/* Center - Control Buttons */}
-          <CallControls
-            isAudioEnabled={isAudioEnabled}
+            showVideoToggle={!isAudioOnly}
             isVideoEnabled={isVideoEnabled}
-            onToggleAudio={toggleAudio}
             onToggleVideo={toggleVideo}
-            onToggleChat={handleChatToggle}
-            onHangup={handleHangup}
-            showVideoToggle={true}
           />
+        ) : isAudioOnly ? (
+          /* Audio Call Controls */
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border border-gray-200">
+            <CallControls
+              isAudioEnabled={isAudioEnabled}
+              onToggleAudio={toggleAudio}
+              onToggleChat={handleChatToggle}
+              onHangup={handleHangup}
+              showVideoToggle={false}
+            />
+          </div>
+        ) : (
+          /* Video Call Controls - Using reusable CallControls component */
+          <div className="flex items-center justify-between gap-8">
+            {/* Left side - Empty for spacing */}
+            <div className="w-32"></div>
 
-          {/* Right side - Local Video */}
-          <div className="relative w-48 h-28 bg-gray-800 rounded-xl overflow-hidden border-2 border-white shadow-lg">
-            {isVideoEnabled ? (
-              <div className="w-full h-full flex items-center justify-center">
-                <img
-                  src="/doc.png"
-                  alt="You"
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-                <div className="text-center text-white">
+            {/* Center - Control Buttons */}
+            <CallControls
+              isAudioEnabled={isAudioEnabled}
+              isVideoEnabled={isVideoEnabled}
+              onToggleAudio={toggleAudio}
+              onToggleVideo={toggleVideo}
+              onToggleChat={handleChatToggle}
+              onHangup={handleHangup}
+              showVideoToggle={true}
+            />
+
+            {/* Right side - Local Video */}
+            <div className="relative w-48 h-28 bg-gray-800 rounded-xl overflow-hidden border-2 border-white shadow-lg">
+              {isVideoEnabled ? (
+                <div className="w-full h-full flex items-center justify-center">
                   <img
-                    src="/VideoCamera.svg"
-                    alt="Video Off"
-                    className="w-4 h-4 mx-auto mb-1 opacity-50"
+                    src="/doc.png"
+                    alt="You"
+                    className="w-16 h-16 rounded-full object-cover"
                   />
-                  <p className="text-xs">Off</p>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <img
+                      src="/VideoCamera.svg"
+                      alt="Video Off"
+                      className="w-4 h-4 mx-auto mb-1 opacity-50"
+                    />
+                    <p className="text-xs">Off</p>
+                  </div>
+                </div>
+              )}
 
-            {/* Local User Info Overlay */}
-            <div className="absolute bottom-1 left-1">
-              <GlassmorphismContainer className="text-white px-2 py-1 rounded text-xs">
-                <span>Me</span>
-              </GlassmorphismContainer>
+              {/* Local User Info Overlay */}
+              <div className="absolute bottom-1 left-1">
+                <GlassmorphismContainer className="text-white px-2 py-1 rounded text-xs">
+                  <span>Me</span>
+                </GlassmorphismContainer>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Transcription Modal */}
+      <TranscriptionModal
+        isOpen={isTranscriptionOpen}
+        onClose={() => setIsTranscriptionOpen(false)}
+        messages={getTranscriptionData()}
+        chatName={chat?.name || "Call Transcription"}
+      />
     </div>
   );
 }
