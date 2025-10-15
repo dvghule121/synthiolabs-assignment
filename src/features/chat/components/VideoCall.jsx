@@ -291,7 +291,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
             />
 
             {/* Right side - Local Video (Desktop only) */}
-            <div className="absolute right-24 md:block relative w-48 h-28 bg-gray-800 rounded-xl overflow-hidden border-2 border-white shadow-lg">
+            <div className="hidden md:block absolute right-24 md:block relative w-48 h-28 bg-gray-800 rounded-xl overflow-hidden border-2 border-white shadow-lg">
               {isVideoEnabled ? (
                 <div className="w-full h-full">
                   <img
