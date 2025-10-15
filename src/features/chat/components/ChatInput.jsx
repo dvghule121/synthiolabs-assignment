@@ -151,7 +151,7 @@ export default function ChatInput({ onSendMessage }) {
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type a message..."
-            className="flex-1 resize-none bg-transparent border border-transparent rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-0"
+            className="flex-1 w-full resize-none bg-transparent border border-transparent rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-0"
             style={{ minHeight: 72, maxHeight: 300 }}
           />
 
