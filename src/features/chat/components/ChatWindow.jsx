@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import ChatMessageMe from "./ChatMessageMe";
 import ChatMessageUser from "./ChatMessageUser";
 import ChatInput from "./ChatInput";
+import TypingIndicator from "./TypingIndicator";
+import { useChat } from "../context/ChatContext";
 
 export default function ChatWindow({ chat }) {
+  const { isLoading } = useChat();
+  const messagesEndRef = useRef(null);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (chat) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chat?.messages, isLoading]);
+
   if (!chat) return null;
 
   return (
@@ -32,11 +44,7 @@ export default function ChatWindow({ chat }) {
           </div>
 
           <div className="border-1 border-gray-100 p-1 w-10 h-10 rounded-full flex items-center justify-center shadow-sm">
-            <img
-              src="/Phone.svg"
-              alt="video-call-btn-icon"
-              className=""
-            />
+            <img src="/Phone.svg" alt="video-call-btn-icon" className="" />
           </div>
         </div>
       </div>
@@ -45,15 +53,28 @@ export default function ChatWindow({ chat }) {
       <div className="flex-1 overflow-y-auto space-y-6 px-8 py-6 pb-16 bg-white w-full">
         {chat.messages.map((msg) =>
           msg.sender === "Me" ? (
-            <ChatMessageMe key={msg.id} text={msg.text} time={msg.timestamp} />
+            <ChatMessageMe
+              key={msg.id}
+              text={msg.text}
+              time={msg.timestamp}
+              attachments={msg.attachments}
+            />
           ) : (
             <ChatMessageUser
               key={msg.id}
               text={msg.text}
               time={msg.timestamp}
+              messageId={msg.id}
+              feedback={msg.feedback}
             />
           )
         )}
+
+        {/* Typing indicator */}
+        {isLoading && <TypingIndicator />}
+
+        {/* Scroll anchor */}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area with Gradient Fade */}

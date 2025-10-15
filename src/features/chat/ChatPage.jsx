@@ -1,21 +1,33 @@
 import { chats } from "./data/chat";
 import ChatPanel from "./components/ChatPanel";
 import ChatWindow from "./components/ChatWindow";
-import { useState } from "react";
+import { useChat } from "./context/ChatContext";
+import { useEffect } from "react";
 
 export default function ChatPage() {
-  const [selectedId, setSelectedId] = useState(chats[0].id);
+  const {
+    chats: contextChats,
+    selectedChatId,
+    selectChat,
+    getSelectedChat,
+    setChats,
+  } = useChat();
+
+  // Initialize chats on first load
+  useEffect(() => {
+    if (contextChats.length === 0) {
+      setChats(chats);
+    }
+  }, [contextChats.length, setChats]);
 
   return (
     <div className="flex flex-1 h-[calc(100vh-104px)] overflow-hidden px-4 pb-4 pt-4">
       <ChatPanel
-        chats={chats}
-        selectedId={selectedId}
-        onSelect={setSelectedId}
+        chats={contextChats}
+        selectedId={selectedChatId}
+        onSelect={selectChat}
       />
-      <ChatWindow
-        chat={chats.find((chat) => chat.id === selectedId)}
-      />
+      <ChatWindow chat={getSelectedChat()} />
     </div>
   );
 }
