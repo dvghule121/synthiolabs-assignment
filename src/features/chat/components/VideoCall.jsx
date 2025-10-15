@@ -44,13 +44,13 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
     const participants = chat?.participants || [];
 
     return (
-      <div className="flex-1 flex flex-col bg-white p-8">
+      <div className="flex-1 flex flex-col bg-white md:p-8 p-4">
         {/* Group Call Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-gray-900 text-2xl font-semibold mb-2">
+        <div className="text-center md:mb-8 mb-6">
+          <h2 className="text-gray-900 md:text-2xl text-xl font-semibold mb-2">
             {chat?.name || "Group Call"}
           </h2>
-          <p className="text-gray-500 text-lg">
+          <p className="text-gray-500 md:text-lg text-base">
             {participants.length} participant
             {participants.length !== 1 ? "s" : ""}
           </p>
@@ -58,7 +58,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
 
         {/* Participants Grid */}
         <div className="flex-1 flex items-center justify-center">
-          <div className="grid grid-cols-2 gap-8 max-w-2xl w-full">
+          <div className="grid md:grid-cols-2 grid-cols-1 md:gap-8 gap-4 max-w-2xl w-full">
             {participants.map((participant, index) => (
               <ParticipantCard
                 key={participant.id}
@@ -93,14 +93,14 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
     const gridRows = Math.ceil(participants.length / gridCols);
 
     return (
-      <div className="flex-1 flex flex-col bg-white p-4">
+      <div className="flex-1 flex flex-col bg-white md:p-4 p-2">
         {/* Video Grid */}
         <div
-          className="flex-1 grid gap-4 max-w-[800px] mx-auto"
-          style={{
-            gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
-            gridTemplateRows: `repeat(${gridRows}, 1fr)`,
-          }}
+          className={`flex-1 grid md:gap-4 gap-2 max-w-[800px] mx-auto ${
+            gridCols <= 4
+              ? "md:grid-cols-2 grid-cols-1"
+              : "md:grid-cols-3 grid-cols-1"
+          }`}
         >
           {participants.map((participant, index) => (
             <ParticipantCard
@@ -138,11 +138,11 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
         )
       ) : isAudioOnly ? (
         /* Audio Call UI - Consistent with theme */
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <div className="flex-1 flex flex-col items-center justify-center md:p-8 p-6">
           {/* Profile Section */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center md:mb-8 mb-6">
             {/* Profile Image */}
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-gray-200">
+            <div className="md:w-24 md:h-24 w-20 h-20 rounded-full overflow-hidden mb-4 border-4 border-gray-200">
               <img
                 src="/doc.png"
                 alt="Profile"
@@ -152,7 +152,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
 
             {/* Call Info */}
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-900 mb-1">
+              <h2 className="md:text-xl text-lg font-semibold text-gray-900 mb-1">
                 {chat?.name || "Dr. Ramakrishnan"}
               </h2>
               <p className="text-sm text-gray-500 mb-3">
@@ -166,7 +166,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
           </div>
 
           {/* Audio Waveform Animation - Subtle */}
-          <div className="flex items-center gap-1 mb-8">
+          <div className="flex items-center gap-1 md:mb-8 mb-6">
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
@@ -182,12 +182,12 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
         </div>
       ) : (
         /* Video Call UI */
-        <div className="relative w-full mx-4 mt-4 max-h-[400px] mx-auto">
+        <div className="relative w-full md:mx-4 mx-4 md:mt-4 mt-2 md:max-h-[400px] max-h-[80%] mx-auto">
           <div
             className="relative h-full mx-auto"
-            style={{ aspectRatio: "16/9" }}
+            style={{ aspectRatio: window.innerWidth >= 768 ? "16/9" : "9/16" }}
           >
-            <div className="absolute inset-0 border-4 border-green-500 rounded-3xl overflow-hidden bg-gray-800">
+            <div className="absolute inset-0 md:border-4 border-2 border-green-500 md:rounded-3xl rounded-2xl overflow-hidden bg-gray-800">
               {/* Remote Video Placeholder */}
               <div className="w-full h-full">
                 <img
@@ -198,17 +198,52 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
               </div>
 
               {/* Remote User Info Overlay */}
-              <div className="absolute bottom-4 left-4">
-                <GlassmorphismContainer className="text-white px-3 py-1">
-                  <span className="text-sm font-medium">
+              <div className="absolute md:bottom-4 md:left-4 bottom-2 left-2">
+                <GlassmorphismContainer className="text-white md:px-3 md:py-1 px-2 py-0.5">
+                  <span className="md:text-sm text-xs font-medium">
                     {chat?.name || "Dr. Ramakrishnan"}
                   </span>
                 </GlassmorphismContainer>
               </div>
 
               {/* Audio Indicator */}
-              <div className="absolute top-4 right-4 bg-white  text-white p-2 rounded-full">
-                <img src="/SpeakerHigh.svg" alt="Audio" className="w-5 h-5" />
+              <div className="absolute md:top-4 md:right-4 top-2 right-2 bg-white text-white md:p-2 p-1.5 rounded-full">
+                <img
+                  src="/SpeakerHigh.svg"
+                  alt="Audio"
+                  className="md:w-5 md:h-5 w-4 h-4"
+                />
+              </div>
+
+              {/* Local Video Overlay - Only on mobile */}
+              <div className="md:hidden absolute bottom-2 right-2 w-24 h-36 bg-gray-800 rounded-lg overflow-hidden border-2 border-white shadow-lg">
+                {isVideoEnabled ? (
+                  <div className="w-full h-full">
+                    <img
+                      src="/doc.png"
+                      alt="You"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <img
+                        src="/VideoCamera.svg"
+                        alt="Video Off"
+                        className="w-2 h-2 mx-auto mb-0.5 opacity-50"
+                      />
+                      <p className="text-[8px]">Off</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Local User Info Overlay */}
+                <div className="absolute bottom-0 left-0">
+                  <GlassmorphismContainer className="text-white px-1 py-0 rounded text-[8px]">
+                    <span>Me</span>
+                  </GlassmorphismContainer>
+                </div>
               </div>
             </div>
           </div>
@@ -216,7 +251,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
       )}
 
       {/* Bottom Controls - Absolutely positioned */}
-      <div className="absolute bottom-2 left-0 right-0 flex justify-center items-center z-10">
+      <div className="absolute md:bottom-2 bottom-1 left-0 right-0 flex justify-center items-center z-10 md:px-0 px-2">
         {isGroupCall ? (
           <CallControls
             isAudioEnabled={isAudioEnabled}
@@ -229,7 +264,7 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
           />
         ) : isAudioOnly ? (
           /* Audio Call Controls */
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border border-gray-200">
+          <div className="bg-white/90 backdrop-blur-sm md:rounded-2xl rounded-xl md:px-6 px-4 md:py-4 py-3 shadow-lg border border-gray-200">
             <CallControls
               isAudioEnabled={isAudioEnabled}
               onToggleAudio={toggleAudio}
@@ -240,9 +275,9 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
           </div>
         ) : (
           /* Video Call Controls - Using reusable CallControls component */
-          <div className="flex items-center justify-between gap-8">
-            {/* Left side - Empty for spacing */}
-            <div className="w-32"></div>
+          <div className="flex items-center md:justify-between justify-center md:gap-8 gap-2 w-full">
+            {/* Left side - Empty for spacing (desktop only) */}
+            <div className="md:w-32 hidden md:block"></div>
 
             {/* Center - Control Buttons */}
             <CallControls
@@ -255,14 +290,14 @@ export default function VideoCall({ onClose, chat, isAudioOnly = false }) {
               showVideoToggle={true}
             />
 
-            {/* Right side - Local Video */}
-            <div className="relative w-48 h-28 bg-gray-800 rounded-xl overflow-hidden border-2 border-white shadow-lg">
+            {/* Right side - Local Video (Desktop only) */}
+            <div className="absolute right-24 md:block relative w-48 h-28 bg-gray-800 rounded-xl overflow-hidden border-2 border-white shadow-lg">
               {isVideoEnabled ? (
-                <div className="w-full h-full flex items-center justify-center">
+                <div className="w-full h-full">
                   <img
                     src="/doc.png"
                     alt="You"
-                    className="w-16 h-16 rounded-full object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               ) : (
