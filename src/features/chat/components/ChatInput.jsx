@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import GradientWrapper from "../../../components/GradientWrapper";
+import { useChat } from "../context/ChatContext";
 
 // ChatInput — refined so the *entire rounded bubble* is the input area.
 // - Attachments render at the top inside the bubble (stacked vertically).
@@ -9,10 +10,11 @@ import GradientWrapper from "../../../components/GradientWrapper";
 
 export default function ChatInput() {
   const [message, setMessage] = useState("");
-  const [attachments, setAttachments] = useState([]); // [{ id, file, preview }]
+  const [attachments, setAttachments] = useState([]);
   const fileRef = useRef(null);
   const textareaRef = useRef(null);
   const wrapperRef = useRef(null);
+  const { sendMessage, isLoading } = useChat();
 
   useEffect(() => {
     // auto-resize textarea to its content
@@ -47,11 +49,14 @@ export default function ChatInput() {
 
   function sendMessageImpl() {
     if (!message.trim() && attachments.length === 0) return;
-    const payload = {
-      text: message.trim(),
-      attachments: attachments.map((a) => a.file),
-    };
-    console.log("send", payload);
+
+    // Send message through context
+    sendMessage(
+      message.trim(),
+      attachments.map((a) => a.file)
+    );
+
+    // Clean up preview URLs
     attachments.forEach((a) => a.preview && URL.revokeObjectURL(a.preview));
     setMessage("");
     setAttachments([]);
@@ -177,10 +182,15 @@ export default function ChatInput() {
               <GradientWrapper className="w-10 h-10 cursor-pointer" active>
                 <button
                   onClick={sendMessageImpl}
-                  className="w-full h-full text-white flex items-center justify-center focus:outline-none rounded-full"
+                  disabled={isLoading}
+                  className="w-full h-full text-white flex items-center justify-center focus:outline-none rounded-full disabled:opacity-50"
                   title="Send"
                 >
-                 <img src="/ArrowUp.svg" alt="send-message"/>
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <img src="/ArrowUp.svg" alt="send-message" />
+                  )}
                 </button>
               </GradientWrapper>
             </div>
