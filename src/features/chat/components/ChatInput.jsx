@@ -8,7 +8,7 @@ import { useChat } from "../context/ChatContext";
 // - Paperclip and Send icons are inside the same bubble row (relative flow).
 // - Clicking anywhere on the bubble focuses the textarea.
 
-export default function ChatInput() {
+export default function ChatInput({ onSendMessage }) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
   const fileRef = useRef(null);
@@ -50,11 +50,19 @@ export default function ChatInput() {
   function sendMessageImpl() {
     if (!message.trim() && attachments.length === 0) return;
 
-    // Send message through context
-    sendMessage(
-      message.trim(),
-      attachments.map((a) => a.file)
-    );
+    // If onSendMessage prop is provided, use it (for NewMessageView)
+    if (onSendMessage) {
+      onSendMessage(
+        message.trim(),
+        attachments.map((a) => a.file)
+      );
+    } else {
+      // Send message through context (for regular chat)
+      sendMessage(
+        message.trim(),
+        attachments.map((a) => a.file)
+      );
+    }
 
     // Clean up preview URLs
     attachments.forEach((a) => a.preview && URL.revokeObjectURL(a.preview));
@@ -80,12 +88,12 @@ export default function ChatInput() {
   }
 
   return (
-    <div className="w-full px-6 pb-6">
+    <div className="w-full md:px-6 px-4 md:pb-6 pb-4">
       <div className="max-w-full">
         {/* Entire bubble is clickable/focusable */}
         <div
           ref={wrapperRef}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 cursor-text mt-3"
+          className="bg-white md:rounded-2xl rounded-xl shadow-sm border border-gray-100 md:p-4 p-3 cursor-text mt-3"
           onClick={focusTextarea}
           style={{
             boxShadow: "-1px 1px 20px rgba(0, 0, 0, 0.1)",
@@ -93,20 +101,20 @@ export default function ChatInput() {
         >
           {/* Attachments stacked at the top, inside the bubble */}
           {attachments.length > 0 && (
-            <div className="flex gap-2 mb-3">
+            <div className="flex gap-2 mb-3 overflow-x-auto">
               {attachments.map((att) => (
                 <div
                   key={att.id}
-                  className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md px-1 py-1 relative"
+                  className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md px-1 py-1 relative flex-shrink-0"
                 >
                   {att.preview ? (
                     <img
                       src={att.preview}
                       alt={att.file.name}
-                      className="w-16 h-16 rounded-sm object-cover"
+                      className="md:w-16 md:h-16 w-14 h-14 rounded-sm object-cover"
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-sm flex items-center justify-center bg-red-200 p- text-xs font-medium">
+                    <div className="md:w-16 md:h-16 w-14 h-14 rounded-sm flex items-center justify-center bg-red-200 p- text-xs font-medium">
                       <img
                         src="/Pdf.svg"
                         alt="pdf-icon"
@@ -118,7 +126,7 @@ export default function ChatInput() {
                   <button
                     onClick={() => removeAttachment(att.id)}
                     type="button"
-                    className="text-black hover:text-gray-900 focus:outline-none absolute -top-2 -right-2 p-1 bg-gray-200 rounded-full"
+                    className="text-black hover:text-gray-900 focus:outline-none absolute -top-2 -right-2 md:p-1 p-0.5 bg-gray-200 rounded-full"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                       <path
@@ -148,25 +156,20 @@ export default function ChatInput() {
           />
 
           {/* Input row: icons and textarea. Textarea occupies the central area and has visible multi-line space. */}
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between md:gap-3 gap-2">
             {/* paperclip inline, in normal flow */}
             <div className="flex-shrink-0">
               <button
                 type="button"
                 onClick={openFileDialog}
-                className="w-10 h-10 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shadow-sm hover:bg-gray-100"
+                className="md:w-10 md:h-10 w-9 h-9 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center shadow-sm hover:bg-gray-100"
                 aria-label="attach file"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                >
-                  <path d="M21.44 11.05l-8.49 8.49a5 5 0 01-7.07-7.07l8.49-8.49a3 3 0 014.24 4.24l-8.49 8.49a1 1 0 01-1.42-1.42l8.49-8.49" />
-                </svg>
+                <img
+                  src="/Paperclip.svg"
+                  alt="attach-file"
+                  className="md:w-auto w-5 h-5"
+                />
                 <input
                   ref={fileRef}
                   type="file"
@@ -179,7 +182,10 @@ export default function ChatInput() {
 
             {/* Send button with gradient wrapper */}
             <div className="flex-shrink-0">
-              <GradientWrapper className="w-10 h-10 cursor-pointer" active>
+              <GradientWrapper
+                className="md:w-10 md:h-10 w-9 h-9 cursor-pointer"
+                active
+              >
                 <button
                   onClick={sendMessageImpl}
                   disabled={isLoading}
@@ -187,9 +193,13 @@ export default function ChatInput() {
                   title="Send"
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="md:w-5 md:h-5 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
-                    <img src="/ArrowUp.svg" alt="send-message" />
+                    <img
+                      src="/ArrowUp.svg"
+                      alt="send-message"
+                      className="md:w-auto w-5 h-5"
+                    />
                   )}
                 </button>
               </GradientWrapper>
