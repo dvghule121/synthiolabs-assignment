@@ -86,25 +86,27 @@ export default function NewMessageView({
   };
 
   return (
-    <section className="flex flex-col flex-1 h-full bg-white rounded-xl overflow-hidden w-full">
+    <section className="flex flex-col flex-1 bg-white md:rounded-xl overflow-hidden w-full min-h-0">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100">
+      <div className="md:px-6 px-4 md:py-4 py-3 border-b border-gray-100 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
-          <div className="font-semibold text-gray-900">New Message</div>
+          <div className="font-semibold text-gray-900 md:text-base text-sm">
+            New Message
+          </div>
 
-          <div className="flex gap-4 items-center">
+          <div className="flex md:gap-4 gap-2 items-center">
             <button
               onClick={handleStartVideoCall}
               disabled={selectedParticipants.length === 0}
-              className="border-1 border-gray-100 p-2 bg-white gap-2 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border-1 border-gray-100 md:p-2 p-1.5 bg-white md:gap-2 gap-1 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Start video call"
             >
               <img
                 src="/VideoCamera.svg"
                 alt="video-call-btn-icon"
-                className=""
+                className="md:w-auto w-5 h-5"
               />
-              <span className="text-sm font-medium text-black">
+              <span className="md:inline hidden text-sm font-medium text-black">
                 Start video call
               </span>
             </button>
@@ -112,11 +114,15 @@ export default function NewMessageView({
             <button
               onClick={handleStartAudioCall}
               disabled={selectedParticipants.length === 0}
-              className="border-1 border-gray-100 p-2 bg-white gap-2 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border-1 border-gray-100 md:p-2 p-1.5 bg-white md:gap-2 gap-1 rounded-full flex items-center justify-center shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Start audio call"
             >
-              <img src="/Phone.svg" alt="audio-call-btn-icon" className="" />
-              <span className="text-sm font-medium text-black">
+              <img
+                src="/Phone.svg"
+                alt="audio-call-btn-icon"
+                className="md:w-auto w-5 h-5"
+              />
+              <span className="md:inline hidden text-sm font-medium text-black">
                 Start audio call
               </span>
             </button>
@@ -125,17 +131,17 @@ export default function NewMessageView({
 
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-700">To:</span>
-          <div className="relative flex-1 max-w-[600px]">
+          <div className="relative flex-1 md:max-w-[600px]">
             <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-gray-200 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent">
               {selectedParticipants.map((participant) => (
                 <div
                   key={participant.id}
-                  className="flex items-center gap-2 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                  className="flex items-center gap-2 bg-blue-100 text-blue-800 md:px-3 px-2 md:py-1 py-0.5 rounded-full md:text-sm text-xs"
                 >
                   <img
                     src={participant.avatar}
                     alt={participant.name}
-                    className="w-5 h-5 rounded-full object-cover"
+                    className="md:w-5 md:h-5 w-4 h-4 rounded-full object-cover"
                   />
                   <span>{participant.name}</span>
                   <button
@@ -163,7 +169,7 @@ export default function NewMessageView({
                   setShowContactList(true);
                 }}
                 onFocus={() => setShowContactList(true)}
-                className="flex-1 min-w-[200px] border-none outline-none text-sm"
+                className="flex-1 md:min-w-[200px] min-w-[120px] border-none outline-none text-sm"
               />
             </div>
 

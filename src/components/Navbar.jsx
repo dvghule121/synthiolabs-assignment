@@ -28,7 +28,9 @@ export default function Navbar() {
           <NavLink
             key={item.path}
             to={item.path}
-            className={"relative text-sm font-medium transition-all duration-200 px-2 py-2 rounded-full text-gray-600 hover:text-gray-800" }
+            className={
+              "relative text-sm font-medium transition-all duration-200 px-2 py-2 rounded-full text-gray-600 hover:text-gray-800"
+            }
           >
             {({ isActive }) =>
               isActive ? (
@@ -40,7 +42,7 @@ export default function Navbar() {
                 </GradientWrapper>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  <img src={item.icon} alt="" />
+                  <img src={item.icon} alt="" className="invert" />
                   {item.name}
                 </span>
               )
