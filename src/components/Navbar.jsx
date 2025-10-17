@@ -16,7 +16,7 @@ export default function Navbar() {
       </div>
 
       <div
-        className="flex items-center justify-center gap-6 px-2 py-2 rounded-full border-2 border-white/60 backdrop-blur-lg w-1/3"
+        className="flex items-center justify-center gap-6 rounded-full border-2 border-white/60 backdrop-blur-lg w-1/3 bg-white/10"
         style={{
           boxShadow: "-1px 3px 7px rgba(0, 0, 0, 0.1)",
           backdropFilter: "blur(20px)",
@@ -41,7 +41,7 @@ export default function Navbar() {
                   </span>
                 </GradientWrapper>
               ) : (
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2 px-4">
                   <img src={item.icon} alt="" className="invert" />
                   {item.name}
                 </span>
